@@ -1,39 +1,48 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useRef } from 'react'
 
 function DraggableSquare() {
-  const [vertical, setVertical] = useState(250)
-  const [horizontal, setHorizontal] = useState(250)
-  const [insideRect, setInsideRect] = useState(null)
+  const insideRectRef = useRef(null);
+  const rootElementRef = useRef(null);
 
   const handleDragStart = useCallback((e) => {
-    const rect = e.target.getBoundingClientRect()
-    const cursorDefaultCoords = {top: e.clientY - rect.top, left: e.clientX - rect.left}
-    setInsideRect(cursorDefaultCoords)
-  }, [setInsideRect])
+    const rect = e.target.getBoundingClientRect();
+    insideRectRef.current = {top: e.clientY - rect.top, left: e.clientX - rect.left};
+  }, []);
 
   const handleDragEnd = useCallback(() => {
-    setInsideRect(null)
-  }, [setInsideRect])
+    insideRectRef.current = null;
+  }, [])
 
   const handleDragBlock = useCallback((e) => {
-    if(insideRect){
-      setVertical(e.clientY - (insideRect.top))
-      setHorizontal(e.clientX - insideRect.left)
+    if (insideRectRef.current && rootElementRef.current){
+      const top = e.clientY - insideRectRef.current.top;
+      const left = e.clientX - insideRectRef.current.left;
+
+      rootElementRef.current.style.top = top + 'px';
+      rootElementRef.current.style.left = left + 'px';
+
+      rootElementRef.current.innerText = (
+          `Y: ${top}
+          X: ${left}`
+      );
     }
-  }, [setVertical, setHorizontal, insideRect])
+
+
+  }, [])
 
   return (
       <section
+        ref={rootElementRef}
         className="block"
-        style={{top: vertical + 'px', left: horizontal + 'px'}}
+        style={{top: '250px', left: '250px'}}
         onMouseDown={handleDragStart}
         onMouseMove={handleDragBlock}
         onMouseUp={handleDragEnd}
         onMouseOut={handleDragEnd}
       >
-        Y: {vertical}
+        Y: 250
         <br/>
-        X: {horizontal}
+        X: 250
       </section>
   )
 }
